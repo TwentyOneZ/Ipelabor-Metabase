@@ -1,36 +1,48 @@
 version: '3.8'
 
 services:
+  # 1. SERVIÇO DE TUNELAMENTO SSH DEDICADO
+  ssh_tunnel:
+    build:
+      context: .
+      dockerfile: Dockerfile.ssh
+    container_name: ssh_tunnel_metabase
+    restart: unless-stopped
+    # Para o túnel funcionar, a chave SSH não pode ter passphrase
+    # ou você precisará de um agente SSH no host.
+    # log: logs mínimos
+    logging:
+      driver: "none"
+    
+  # 2. SERVIÇO METABASE
   metabase:
     image: metabase/metabase:latest
     container_name: metabase
     restart: unless-stopped
     
-    # Mapeia a porta 3000 do container para a porta 7001 do host
+    # O Metabase agora depende do túnel estar UP
+    depends_on:
+      ssh_tunnel:
+        condition: service_started
+        
     ports:
       - "7001:3000"
-    
+      
     environment:
-      # Variáveis para o banco de dados INTERNO (Metadata) do Metabase
-      # OBS: O host 'ipelabor.sytes.net' deve estar acessível de onde o Docker está rodando.
+      # Conexão do Metabase DB interno (Metadata) ao host externo
       MB_DB_TYPE: mysql
       MB_DB_HOST: ipelabor.sytes.net
-      MB_DB_PORT: 7306  # Usando a porta externa que você especificou
+      MB_DB_PORT: 7306 
       MB_DB_DBNAME: metabase
       MB_DB_USER: metabase
       MB_DB_PASS: q1w2e3
-      
-      # URL completa, usando as variáveis acima
       MB_DB_CONNECTION_URI: "mysql://metabase:q1w2e3@ipelabor.sytes.net:7306/metabase?useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&serverTimezone=America/Sao_Paulo"
       
-      # Outras variáveis de configuração
       TZ: America/Sao_Paulo
       JAVA_OPTS: "-Xmx1g"
       
     volumes:
-      # Mantém o volume, embora a maioria dos dados agora vá para o MySQL externo.
-      # Útil para logs e cache de driver.
-      - metabase_data:/metabase-data 
+      - metabase_data:/metabase-data
 
 volumes:
   metabase_data:

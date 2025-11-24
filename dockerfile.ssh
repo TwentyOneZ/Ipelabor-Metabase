@@ -1,0 +1,17 @@
+FROM alpine/ssh
+# Instala o cliente SSH (o alpine/ssh já deve ter)
+# RUN apk add --no-cache openssh-client
+
+# Cria o diretório de configuração SSH e define as permissões
+RUN mkdir -p /root/.ssh
+RUN chmod 700 /root/.ssh
+
+# Copia a chave privada para dentro do contêiner
+# ASSUMA que sua chave privada se chama 'ipelabor.key'
+COPY ipelabor.key /root/.ssh/id_rsa
+
+# Define as permissões corretas para a chave privada (obrigatório pelo SSH)
+RUN chmod 600 /root/.ssh/id_rsa
+
+# Define o comando de entrada (ENTRYPOINT) para rodar o túnel SSH
+ENTRYPOINT ["ssh", "-N", "-R", "7001:localhost:7001", "ipelabor_marketing@ipelabor.sytes.net", "-i", "/root/.ssh/id_rsa"]
