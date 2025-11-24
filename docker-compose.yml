@@ -5,7 +5,7 @@ services:
   ssh_tunnel:
     build:
       context: .
-      dockerfile: Dockerfile.ssh
+      dockerfile: dockerfile.ssh
     container_name: ssh_tunnel_metabase
     restart: unless-stopped
     # Para o túnel funcionar, a chave SSH não pode ter passphrase
