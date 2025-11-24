@@ -10,13 +10,15 @@ RUN mkdir -p /root/.ssh
 RUN chmod 700 /root/.ssh
 
 # Copia a chave privada para dentro do contêiner
-# Certifique-se de que sua chave se chame 'ipelabor.key' no diretório raiz do projeto
+# Assumimos que o nome da sua chave privada é 'ipelabor.key'
 COPY ipelabor.key /root/.ssh/id_rsa
 
 # Define as permissões corretas para a chave privada (obrigatório pelo SSH)
 RUN chmod 600 /root/.ssh/id_rsa
 
-# Define o comando de entrada para rodar o túnel SSH,
-# mantendo o comando que você havia definido:
-# ssh -N -R 7001:localhost:7001 ipelabor_marketing@ipelabor.sytes.net -i /root/.ssh/id_rsa
-ENTRYPOINT ["ssh", "-N", "-R", "7001:localhost:7001", "ipelabor_marketing@ipelabor.sytes.net", "-i", "/root/.ssh/id_rsa"]
+# Define o comando de entrada (ENTRYPOINT) para rodar o túnel SSH
+# NOVOS ARGUMENTOS: -o UserKnownHostsFile=/dev/null e -o StrictHostKeyChecking=no
+ENTRYPOINT ["ssh", "-N", "-R", "7001:metabase:3000", "-i", "/root/.ssh/id_rsa", \
+            "-o", "UserKnownHostsFile=/dev/null", \
+            "-o", "StrictHostKeyChecking=no", \
+            "ipelabor_marketing@ipelabor.sytes.net"]
