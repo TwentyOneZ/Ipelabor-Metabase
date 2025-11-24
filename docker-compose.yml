@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase
+    restart: unless-stopped
+    
+    # Mapeia a porta 3000 do container para a porta 7001 do host
+    ports:
+      - "7001:3000"
+    
+    environment:
+      # Variáveis para o banco de dados INTERNO (Metadata) do Metabase
+      # OBS: O host 'ipelabor.sytes.net' deve estar acessível de onde o Docker está rodando.
+      MB_DB_TYPE: mysql
+      MB_DB_HOST: ipelabor.sytes.net
+      MB_DB_PORT: 7306  # Usando a porta externa que você especificou
+      MB_DB_DBNAME: metabase
+      MB_DB_USER: metabase
+      MB_DB_PASS: q1w2e3
+      
+      # URL completa, usando as variáveis acima
+      MB_DB_CONNECTION_URI: "mysql://metabase:q1w2e3@ipelabor.sytes.net:7306/metabase?useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&serverTimezone=America/Sao_Paulo"
+      
+      # Outras variáveis de configuração
+      TZ: America/Sao_Paulo
+      JAVA_OPTS: "-Xmx1g"
+      
+    volumes:
+      # Mantém o volume, embora a maioria dos dados agora vá para o MySQL externo.
+      # Útil para logs e cache de driver.
+      - metabase_data:/metabase-data 
+
+volumes:
+  metabase_data:
