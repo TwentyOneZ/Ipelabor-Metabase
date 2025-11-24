@@ -1,4 +1,4 @@
-# Usa uma imagem Alpine leve e estável (para corrigir o erro de 'alpine/ssh')
+# Usa uma imagem Alpine leve e estável
 FROM alpine:latest
 
 # Instala o cliente SSH (openssh-client)
@@ -10,15 +10,18 @@ RUN mkdir -p /root/.ssh
 RUN chmod 700 /root/.ssh
 
 # Copia a chave privada para dentro do contêiner
-# Assumimos que o nome da sua chave privada é 'ipelabor.key'
 COPY ipelabor.key /root/.ssh/id_rsa
 
 # Define as permissões corretas para a chave privada (obrigatório pelo SSH)
 RUN chmod 600 /root/.ssh/id_rsa
 
-# Define o comando de entrada (ENTRYPOINT) para rodar o túnel SSH
-# NOVOS ARGUMENTOS: -o UserKnownHostsFile=/dev/null e -o StrictHostKeyChecking=no
-ENTRYPOINT ["ssh", "-N", "-R", "7001:metabase:3000", "-i", "/root/.ssh/id_rsa", \
+# NOVO COMANDO: 
+# 1. Usa -L para o túnel local (porta do MySQL 7306).
+# 2. Adiciona -o ExitOnForwardFailure=yes para reiniciar automaticamente em caso de falha de bind.
+ENTRYPOINT ["ssh", "-N", \
+            "-L", "7306:ipelabor.sytes.net:7306", \
+            "-i", "/root/.ssh/id_rsa", \
             "-o", "UserKnownHostsFile=/dev/null", \
             "-o", "StrictHostKeyChecking=no", \
+            "-o", "ExitOnForwardFailure=yes", \
             "ipelabor_marketing@ipelabor.sytes.net"]
