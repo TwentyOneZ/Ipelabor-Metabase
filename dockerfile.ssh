@@ -16,10 +16,10 @@ COPY ipelabor.key /root/.ssh/id_rsa
 RUN chmod 600 /root/.ssh/id_rsa
 
 # NOVO COMANDO: 
-# 1. Usa -L para o túnel local (porta do MySQL 7306).
+# 1. Usa -L para o túnel local (porta do MySQL 7001).
 # 2. Adiciona -o ExitOnForwardFailure=yes para reiniciar automaticamente em caso de falha de bind.
 ENTRYPOINT ["ssh", "-N", \
-            "-L", "7306:ipelabor.sytes.net:7306", \
+            "-R", "7001:metabase:3000", \
             "-i", "/root/.ssh/id_rsa", \
             "-o", "UserKnownHostsFile=/dev/null", \
             "-o", "StrictHostKeyChecking=no", \
